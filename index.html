@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f19" />
+  <title>Cutting Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="toast" class="toast" role="status"></div>
+
+  <section id="authScreen" class="screen auth-screen">
+    <div class="auth-card">
+      <div class="brand-mark">CT</div>
+      <p class="eyebrow">PROJETO PESSOAL</p>
+      <h1>Cutting Tracker</h1>
+      <p class="auth-subtitle">Seu painel para acompanhar a evolução, manter consistência e registrar cada semana do projeto.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-mode="login">Entrar</button>
+        <button class="auth-tab" data-mode="signup">Criar conta</button>
+      </div>
+
+      <form id="authForm" class="stack">
+        <label>
+          E-mail
+          <input id="authEmail" type="email" autocomplete="email" placeholder="seu@email.com" required />
+        </label>
+        <label>
+          Senha
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="Mínimo de 6 caracteres" required />
+        </label>
+        <button id="authSubmit" class="btn btn-primary btn-block" type="submit">Entrar</button>
+        <button id="resetPassword" class="text-btn" type="button">Esqueci minha senha</button>
+      </form>
+
+      <div id="setupHint" class="setup-hint hidden">
+        <strong>Modo de teste local</strong>
+        <span>O Firebase ainda não está configurado. Você pode explorar o layout e salvar dados somente neste navegador.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="appScreen" class="hidden">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <button class="brand" id="goDashboard" type="button" aria-label="Voltar ao painel">
+          <span class="brand-mark small">CT</span>
+          <span>
+            <strong>Cutting Tracker</strong>
+            <small>Painel de evolução</small>
+          </span>
+        </button>
+        <div class="top-actions">
+          <span id="connectionBadge" class="status-badge">LOCAL</span>
+          <button id="themeToggle" class="icon-btn" type="button" title="Alternar tema">◐</button>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Sair</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <nav>
+          <button class="nav-item active" data-section="dashboard"><span>⌂</span> Visão geral</button>
+          <button class="nav-item" data-section="daily"><span>✓</span> Registro diário</button>
+          <button class="nav-item" data-section="weekly"><span>◫</span> Metas semanais</button>
+          <button class="nav-item" data-section="history"><span>▤</span> Histórico</button>
+          <button class="nav-item" data-section="settings"><span>⚙</span> Configurações</button>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="tiny-label">USUÁRIO</span>
+          <span id="userEmail" class="user-email">—</span>
+        </div>
+      </aside>
+
+      <div class="content">
+        <section id="section-dashboard" class="page-section active-section">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">ACOMPANHAMENTO</p>
+              <h2>Seu cutting, em um só lugar.</h2>
+              <p id="welcomeText" class="muted">Consistência primeiro. Os números contam o resto.</p>
+            </div>
+            <button class="btn btn-primary" id="quickCheckin">+ Registrar hoje</button>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card accent-card">
+              <span>PESO ATUAL</span>
+              <strong id="statWeight">—</strong>
+              <small id="statWeightDelta">Sem registro</small>
+            </article>
+            <article class="stat-card">
+              <span>ÁGUA HOJE</span>
+              <strong id="statWater">—</strong>
+              <small id="statWaterTarget">Meta não definida</small>
+            </article>
+            <article class="stat-card">
+              <span>CHECK-INS</span>
+              <strong id="statCheckins">0</strong>
+              <small>Total registrado</small>
+            </article>
+            <article class="stat-card">
+              <span>CONSISTÊNCIA</span>
+              <strong id="statConsistency">0%</strong>
+              <small>Últimos 7 dias</small>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel chart-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="panel-kicker">EVOLUÇÃO</span>
+                  <h3>Peso ao longo do tempo</h3>
+                </div>
+                <span id="chartRange" class="muted">últimos registros</span>
+              </div>
+              <div id="weightChart" class="chart-wrap">
+                <div class="empty-state">Registre alguns pesos para ver o gráfico.</div>
+              </div>
+            </article>
+
+            <article class="panel progress-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="panel-kicker">HOJE</span>
+                  <h3>Hidratação</h3>
+                </div>
+                <span id="waterPercent">0%</span>
+              </div>
+              <div class="donut" id="waterDonut"><div><strong id="waterDonutValue">0.0</strong><span>L</span></div></div>
+              <p id="waterMessage" class="muted center">Registre sua água de hoje.</p>
+              <div class="water-quick">
+                <button data-water-add="0.25">+250 ml</button>
+                <button data-water-add="0.5">+500 ml</button>
+                <button data-water-add="1">+1 L</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid bottom-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="panel-kicker">RECENTE</span>
+                  <h3>Últimos registros</h3>
+                </div>
+                <button class="text-btn" data-go="history">Ver histórico</button>
+              </div>
+              <div id="recentList" class="record-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="panel-kicker">SEMANA</span>
+                  <h3>Checklist</h3>
+                </div>
+                <button class="text-btn" data-go="weekly">Editar</button>
+              </div>
+              <div id="miniChecklist" class="mini-checklist"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="section-daily" class="page-section">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">CHECK-IN</p>
+              <h2>Registro diário</h2>
+              <p class="muted">Um registro completo vale mais que dez dias de memória aproximada.</p>
+            </div>
+            <div class="date-picker-wrap">
+              <label>Data<input id="dailyDate" type="date" /></label>
+            </div>
+          </div>
+
+          <form id="dailyForm" class="panel form-panel">
+            <div class="form-grid">
+              <label>Peso (kg)<input id="weight" type="number" min="0" step="0.1" placeholder="Ex.: 85.4" /></label>
+              <label>Água (L)<input id="water" type="number" min="0" step="0.1" placeholder="Ex.: 4.0" /></label>
+              <label>Calorias (kcal)<input id="calories" type="number" min="0" step="1" placeholder="Ex.: 2400" /></label>
+              <label>Proteína (g)<input id="protein" type="number" min="0" step="1" placeholder="Ex.: 180" /></label>
+              <label>Cardio (min)<input id="cardio" type="number" min="0" step="1" placeholder="Ex.: 25" /></label>
+              <label>Passos<input id="steps" type="number" min="0" step="1" placeholder="Ex.: 8000" /></label>
+              <label>Sono (h)<input id="sleep" type="number" min="0" max="24" step="0.1" placeholder="Ex.: 7.5" /></label>
+              <label>Energia (1–10)<input id="energy" type="number" min="1" max="10" step="1" placeholder="Ex.: 8" /></label>
+            </div>
+
+            <div class="check-grid">
+              <label class="check-card"><input id="training" type="checkbox" /><span><strong>Treino realizado</strong><small>Marque quando concluir.</small></span></label>
+              <label class="check-card"><input id="diet" type="checkbox" /><span><strong>Dieta cumprida</strong><small>Dentro do planejamento.</small></span></label>
+              <label class="check-card"><input id="cardioDone" type="checkbox" /><span><strong>Cardio cumprido</strong><small>Meta do dia concluída.</small></span></label>
+              <label class="check-card"><input id="sleepGood" type="checkbox" /><span><strong>Sono adequado</strong><small>Descanso alinhado à meta.</small></span></label>
+            </div>
+
+            <label>Observações<textarea id="notes" rows="4" placeholder="Como foi o dia? Fome, disposição, treino, retenção, dificuldades... "></textarea></label>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Salvar registro</button>
+              <button class="btn btn-ghost" id="clearDaily" type="button">Limpar</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="section-weekly" class="page-section">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">CONSISTÊNCIA</p>
+              <h2>Metas semanais</h2>
+              <p class="muted">Use esta área para marcar as ações que precisam acontecer toda semana.</p>
+            </div>
+            <div class="week-nav">
+              <button class="icon-btn" id="prevWeek">‹</button>
+              <strong id="weekLabel">Semana atual</strong>
+              <button class="icon-btn" id="nextWeek">›</button>
+            </div>
+          </div>
+
+          <div class="panel weekly-summary">
+            <div>
+              <span class="panel-kicker">PROGRESSO DA SEMANA</span>
+              <h3 id="weekPercent">0% concluído</h3>
+            </div>
+            <div class="progress-track"><span id="weekProgress"></span></div>
+          </div>
+
+          <div id="weeklyGoals" class="goal-grid"></div>
+
+          <form id="addGoalForm" class="panel inline-form">
+            <label>Adicionar meta semanal<input id="newGoal" maxlength="80" placeholder="Ex.: Fazer 3 sessões de cardio" required /></label>
+            <button class="btn btn-primary" type="submit">Adicionar meta</button>
+          </form>
+        </section>
+
+        <section id="section-history" class="page-section">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">HISTÓRICO</p>
+              <h2>Seus registros</h2>
+              <p class="muted">Tudo o que foi salvo fica organizado por data.</p>
+            </div>
+            <button class="btn btn-ghost" id="exportData">Exportar backup</button>
+          </div>
+          <div class="panel table-panel">
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Data</th><th>Peso</th><th>Água</th><th>Calorias</th><th>Proteína</th><th>Cardio</th><th>Treino</th><th></th></tr></thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="section-settings" class="page-section">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">PROJETO</p>
+              <h2>Configurações</h2>
+              <p class="muted">Defina suas metas pessoais e o comportamento do painel.</p>
+            </div>
+          </div>
+
+          <form id="settingsForm" class="panel form-panel">
+            <h3>Metas principais</h3>
+            <div class="form-grid">
+              <label>Meta de água (L/dia)<input id="targetWater" type="number" min="0" step="0.1" placeholder="Ex.: 4.0" /></label>
+              <label>Meta de peso (kg)<input id="targetWeight" type="number" min="0" step="0.1" placeholder="Opcional" /></label>
+              <label>Meta de cardio (min/semana)<input id="targetCardioWeek" type="number" min="0" step="1" placeholder="Ex.: 120" /></label>
+              <label>Meta de treinos/semana<input id="targetTrainingWeek" type="number" min="0" step="1" placeholder="Ex.: 5" /></label>
+            </div>
+            <h3 class="subhead">Tema</h3>
+            <div class="theme-options">
+              <label><input type="radio" name="theme" value="dark" /> Escuro</label>
+              <label><input type="radio" name="theme" value="light" /> Claro</label>
+              <label><input type="radio" name="theme" value="system" /> Sistema</label>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Salvar configurações</button>
+            </div>
+          </form>
+
+          <div id="firebaseStatus" class="panel info-panel"></div>
+        </section>
+      </div>
+    </main>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
